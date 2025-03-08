@@ -29,6 +29,7 @@ def process_frame():
     if not ret:
         return None, 0 # Captures the frame and returns none if it is not captured properly Ex. Error sa Webcam
 
+    frame = cv2.flip(frame, 1) # Mirror Video
     frame = cv2.resize(frame, (1020, 500))
     results = model.predict(frame)
     detections = results[0].boxes.data.cpu().numpy()  # Ensure tensor is converted to NumPy
@@ -58,16 +59,6 @@ def process_frame():
                 cv2.imwrite(filename, cropped_person)
                 print(f"Saved: {filename}")
 
-    # Draw crossing line
-    cv2.line(frame, (x_line, 0), (x_line, 500), (0, 0, 255), 2)
-
-    # Common Area Label
-    cv2.putText(frame, "<- Common Area", (x_line - 375, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-
-    # Restricted Area Warning
-    cv2.putText(frame, "Restricted Area ->", (x_line + 10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-    cv2.putText(frame, "Your image may be captured & stored", (x_line + 10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6,(0, 0, 255), 2)
-
     return frame, person_count
 
 
@@ -80,6 +71,16 @@ while True:
     Color = (0, 0, 0)
     ui_frame = np.full((600, 1020, 3), Color, dtype=np.uint8)
     ui_frame[:500, :] = frame
+
+    # Draw crossing line
+    cv2.line(ui_frame, (x_line, 0), (x_line, 500), (0, 0, 255), 2)
+
+    # Common Area Label
+    cv2.putText(ui_frame, "<- Common Area", (x_line - 375, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+
+    # Restricted Area Warning
+    cv2.putText(ui_frame, "Restricted Area ->", (x_line + 10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+    cv2.putText(ui_frame, "Your image may be captured & stored", (x_line + 10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
     # Counter
     cv2.putText(ui_frame, f"People Count: {person_count}", (20, 550), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
