@@ -22,14 +22,13 @@ with open("coco.txt", "r") as f:
 # Webcam
 cap = cv2.VideoCapture(0)
 
-
 def process_frame():
     global cap
     ret, frame = cap.read()
     if not ret:
-        return None, 0 # Captures the frame and returns none if it is not captured properly Ex. Error sa Webcam
+        return None, 0  # Captures the frame and returns none if it is not captured properly
 
-    frame = cv2.flip(frame, 1) # Mirror Video
+    frame = cv2.flip(frame, 1)  # Mirror Video
     frame = cv2.resize(frame, (1020, 500))
     results = model.predict(frame)
     detections = results[0].boxes.data.cpu().numpy()  # Ensure tensor is converted to NumPy
@@ -37,7 +36,7 @@ def process_frame():
     if detections is None or len(detections) == 0:
         return frame, 0
 
-    df = pd.DataFrame(detections).astype("float") # Convert to Panda
+    df = pd.DataFrame(detections).astype("float")  # Convert to Panda
 
     person_count = 0
     for i, row in df.iterrows():
@@ -46,13 +45,13 @@ def process_frame():
 
         x1, y1, x2, y2, _, class_id = map(int, row)
 
-        if 0 <= class_id < len(class_list) and class_list[class_id] == "person": # Confirm if person
+        if 0 <= class_id < len(class_list) and class_list[class_id] == "person":  # Confirm if person
             person_count += 1
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2) # Frame
-            cv2.putText(frame, "person", (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1) # Title
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Frame
+            cv2.putText(frame, "person", (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)  # Title
 
-            # Save cropped image
-            if x2 > x_line > x1:
+            # Save cropped image when the person fully enters the restricted area
+            if x1 > x_line:
                 cropped_person = frame[max(y1, 0):min(y2, frame.shape[0]), max(x1, 0):min(x2, frame.shape[1])]
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
                 filename = f"{save_path}/person_{timestamp}_{i}.jpg"
@@ -61,11 +60,10 @@ def process_frame():
 
     return frame, person_count
 
-
 while True:
     frame, person_count = process_frame()
     if frame is None:
-        break # Main Loop ng Detection
+        break  # Main Loop ng Detection
 
     # UI
     Color = (0, 0, 0)
