@@ -1,4 +1,4 @@
-project title: Live Person Detection, Counting, and Image Capture
+project title: VisionGuard: Live Person Detection, Counting, and Image Capture
 
 members : Contreras, Justin & Dumas, Joaquin Miguel
 
